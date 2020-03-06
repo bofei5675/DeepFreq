@@ -17,4 +17,4 @@ source /scratch/bz1030/capstone_env/bin/activate
 
 cd ..
 python train.py --n_training 200000 --n_epochs_fr 200 --n_epochs_fc 100 --snr ${snr}\
- --output_dir ./checkpoint/model_${snr}_${bias}
+ --output_dir ./checkpoint/model_snr_${snr}_bias_${bias}
