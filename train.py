@@ -206,6 +206,7 @@ if __name__ == '__main__':
                         help='frequency of saving checkpoints at the end of epochs')
     parser.add_argument('--numpy_seed', type=int, default=100)
     parser.add_argument('--torch_seed', type=int, default=76)
+    parser.add_argument('--bias', type=util.str2bool, default='no', help='no: network without bias; yes: network with bias')
 
     args = parser.parse_args()
 
