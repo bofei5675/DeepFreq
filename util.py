@@ -55,6 +55,8 @@ def save(model, optimizer, scheduler, args, epoch, module_type):
 def load(fn, module_type, device = torch.device('cuda')):
     checkpoint = torch.load(fn, map_location=device)
     args = checkpoint['args']
+    if not hasattr(args, 'bias'):
+        args.bias = False
     if device == torch.device('cpu'):
         args.use_cuda = False
     if module_type == 'fr':
