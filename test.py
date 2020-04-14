@@ -10,6 +10,7 @@ import util
 import matplotlib
 
 matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -20,8 +21,8 @@ params = {
     'xtick.labelsize': 9,
     'ytick.labelsize': 9,
     'axes.labelsize': 11,
-    'text.usetex': True,
-    'text.latex.unicode': True,
+    'text.usetex': False,
+    'text.latex.unicode': False,
     'figure.figsize': [7, 4]
 }
 matplotlib.rcParams.update(params)
@@ -197,7 +198,7 @@ if __name__ == '__main__':
     ax.set_ylabel('FNR (\%)')
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles[::-1], labels[::-1])
-    plt.savefig(os.path.join(args.output_dir, 'fnr.pdf'), bbox_inches='tight', pad_inches=0.0)
+    plt.savefig(os.path.join(args.output_dir, 'fnr.png'), bbox_inches='tight', pad_inches=0.0)
     plt.close()
 
     if args.fc_path is not None:
@@ -215,7 +216,7 @@ if __name__ == '__main__':
         ax.set_ylim(bottom=0.)
         handles, labels = ax.get_legend_handles_labels()
         ax.legend(handles[::-1], labels[::-1])
-        plt.savefig(os.path.join(args.output_dir, 'counting.pdf'), bbox_inches='tight', pad_inches=0.0)
+        plt.savefig(os.path.join(args.output_dir, 'counting.png'), bbox_inches='tight', pad_inches=0.0)
         plt.close()
 
         if os.path.isfile(os.path.join(args.cblasso_dir, 'chamfer')):
@@ -238,5 +239,5 @@ if __name__ == '__main__':
         ax.set_ylabel('Chamfer error')
         handles, labels = ax.get_legend_handles_labels()
         ax.legend(handles[::-1], labels[::-1])
-        plt.savefig(os.path.join(args.output_dir, 'chamfer.pdf'), bbox_inches='tight', pad_inches=0.0)
+        plt.savefig(os.path.join(args.output_dir, 'chamfer.png'), bbox_inches='tight', pad_inches=0.0)
         plt.close()
