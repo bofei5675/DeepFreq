@@ -139,6 +139,7 @@ class PSnet(nn.Module):
                 nn.BatchNorm1d(n_filters),
                 nn.ReLU()
             ]
+            print(mod[-1][0])
         self.mod = nn.Sequential(*mod)
         self.out_layer = nn.Linear(inner_dim * n_filters, fr_size, bias=bias)
 
@@ -160,14 +161,11 @@ class FrequencyRepresentationModule(nn.Module):
         self.in_layer = nn.Linear(2 * signal_dim, inner_dim * n_filters, bias=bias)
         mod = []
         for n in range(n_layers):
-            if bias:
-                batchnorm = nn.BatchNorm1d
-            else:
-                batchnorm = BFBatchNorm1d
+            batchnorm = BFBatchNorm1d
             mod += [
                 nn.Conv1d(n_filters, n_filters, kernel_size=kernel_size, padding=kernel_size - 1, bias=bias,
                           padding_mode='circular'),
-                batchnorm(n_filters),
+                batchnorm(n_filters, use_bias=bias),
                 nn.ReLU(),
             ]
         self.mod = nn.Sequential(*mod)
