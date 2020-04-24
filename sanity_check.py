@@ -17,32 +17,28 @@ from data import fr
 from data.loss import fnr
 
 #load models
-fr_path = '/scratch/bz1030/DS-GA-1013/DeepFreq/checkpoint/model_snr_30_bias_yes/fr/epoch_300.pth'
+fr_path = '/scratch/bz1030/DS-GA-1013/DeepFreq/checkpoint/model_snr_30_bias_no/fr/epoch_300.pth'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 fr_module, _, _, _, _ = util.load(fr_path, 'fr', device)
 fr_module.to(device)
 fr_module.eval()
 
-inputs = torch.randn((1, 2, 50)).float()
-outputs = fr_module(inputs)
-print(outputs.shape)
-
 for idx, layer in enumerate(fr_module.modules()):
     if isinstance(layer, BFBatchNorm1d):
         #print(layer)
-        x = torch.randn((2, 64, 100))
+        x = torch.randn((2, 64, 100)).to(device)
         alpha = 2
         y1 = layer(alpha * x)
         y2 = alpha * layer(x)
 
         print('scale',(y1 - y2).sum().item())
 
-        x = torch.zeros((2, 64,  100))
+        x = torch.zeros((2, 64,  100)).to(device)
         y = layer(x)
         y = (y - 0) ** 2
         print('zero', y.sum().item())
-        print('BN param', layer.running_mean, layer.running_var,
-              layer.weight, layer.bias)
+        #print('BN param', layer.running_mean, layer.running_var,
+        #     layer.weight, layer.bias)
 
 def unit_test(training = True):
     def print_bn_details(bn):
