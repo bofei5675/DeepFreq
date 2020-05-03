@@ -30,7 +30,8 @@ def train_frequency_representation(args, fr_module, fr_optimizer, fr_criterion, 
     for batch_idx, (clean_signal, target_fr, freq) in enumerate(train_loader):
         if args.use_cuda:
             clean_signal, target_fr = clean_signal.cuda(), target_fr.cuda()
-        noisy_signal = noise_torch(clean_signal, args.snr, args.noise)
+        snr = np.random.uniform(args.snrl, args.snrh + 1)
+        noisy_signal = noise_torch(clean_signal, snr, args.noise)
         fr_optimizer.zero_grad()
         output_fr = fr_module(noisy_signal)
         loss_fr = fr_criterion(output_fr, target_fr)
@@ -51,9 +52,9 @@ def train_frequency_representation(args, fr_module, fr_optimizer, fr_criterion, 
         f_hat = fr.find_freq(output_fr.cpu().detach().numpy(), nfreq, xgrid)
         fnr_val += fnr(f_hat, freq.cpu().numpy(), args.signal_dim)
 
-    loss_train_fr /= args.n_training
-    loss_val_fr /= args.n_validation
-    fnr_val *= 100 / args.n_validation
+    loss_train_fr /= (args.n_training * (args.snrh - args.snrl + 1))
+    loss_val_fr /= (args.n_validation * (args.snrh - args.snrl + 1))
+    fnr_val *= 100 / (args.n_validation * (args.snrh - args.snrl + 1))
 
     tb_writer.add_scalar('fr_l2_training', loss_train_fr, epoch)
     tb_writer.add_scalar('fr_l2_validation', loss_val_fr, epoch)
@@ -77,7 +78,9 @@ def train_frequency_counting(args, fr_module, fc_module, fc_optimizer, fc_criter
     for batch_idx, (clean_signal, target_fr, freq) in enumerate(train_loader):
         if args.use_cuda:
             clean_signal, target_fr, freq = clean_signal.cuda(), target_fr.cuda(), freq.cuda()
-        noisy_signal = noise_torch(clean_signal, args.snr, args.noise)
+        snr = np.random.uniform(args.snrl, args.snrh + 1)
+
+        noisy_signal = noise_torch(clean_signal, snr, args.noise)
         nfreq = (freq >= -0.5).sum(dim=1)
         if args.use_cuda:
             nfreq = nfreq.cuda()
@@ -167,7 +170,8 @@ if __name__ == '__main__':
     parser.add_argument('--amplitude', type=str, default='normal_floor', help='spike amplitude distribution')
     parser.add_argument('--floor_amplitude', type=float, default=0.1, help='minimum amplitude of spikes')
     parser.add_argument('--noise', type=str, default='gaussian_blind', help='kind of noise to use')
-    parser.add_argument('--snr', type=float, default=1., help='snr parameter')
+    parser.add_argument('--snrl', type=int, default=1., help='snr parameter lower bound')
+    parser.add_argument('--snrh', type=int, default=1., help='snr parameter higher bound')
     # frequency-representation (fr) module parameters
     parser.add_argument('--fr_module_type', type=str, default='fr', help='type of the fr module: [fr | psnet]')
     parser.add_argument('--fr_n_layers', type=int, default=20, help='number of convolutional layers in the fr module')
@@ -194,8 +198,8 @@ if __name__ == '__main__':
     parser.add_argument('--gaussian_std', type=float, default=0.3,
                         help='std of the gaussian kernel normalized by signal_dim')
     # training parameters
-    parser.add_argument('--n_training', type=int, default=50000, help='# of training data')
-    parser.add_argument('--n_validation', type=int, default=1000, help='# of validation data')
+    parser.add_argument('--n_training', type=int, default=50000, help='# of training data per snr')
+    parser.add_argument('--n_validation', type=int, default=1000, help='# of validation data per snr')
     parser.add_argument('--lr_fr', type=float, default=0.0003,
                         help='initial learning rate for adam optimizer used for the frequency-representation module')
     parser.add_argument('--lr_fc', type=float, default=0.0003,

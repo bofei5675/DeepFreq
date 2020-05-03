@@ -35,9 +35,9 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, required=True,
                         help='The data dir. Should contain the .npy files for the tested dB and the frequency file.')
     parser.add_argument('--fr_path1', default=None, type=str, required=True,
-                        help='Frequency-representation module path.')
+                        help='Biased Frequency-representation module path.')
     parser.add_argument('--fr_path2', default=None, type=str, required=True,
-                        help='Frequency-representation module path.')
+                        help='Bias-free Frequency-representation module path.')
     parser.add_argument('--output_dir', default=None, type=str, required=True,
                         help='The output directory where the results will be written.')
     parser.add_argument('--overwrite', action='store_true',
@@ -46,9 +46,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     use_cuda = torch.cuda.is_available()
     device = torch.device('cuda' if use_cuda else 'cpu')
-    fr_module1, _, _, _, _ = util.load(args.fr_path1, 'fr')
+    fr_module1, _, _, _, _ = util.load(args.fr_path1, 'fr', device=device)
     fr_module1.eval()
-    fr_module2, _, _, _, _ = util.load(args.fr_path2, 'fr')
+    fr_module2, _, _, _, _ = util.load(args.fr_path2, 'fr', device=device)
     fr_module2.eval()
     if use_cuda:
         fr_module1.cuda()
@@ -100,7 +100,7 @@ if __name__ == '__main__':
             model_fr = model_fr_torch.cpu().numpy()
             f_model = fr.find_freq(model_fr, nfreq, xgrid)
             model1_fnr_arr.append(100 * loss.fnr(f_model, f, signal_dim) / num_test)
-            # get fr for the second model
+            # get fr for the second model [bias free]
             model_fr_torch = fr_module2(noisy_signals)
             model_fr = model_fr_torch.cpu().numpy()
             f_model = fr.find_freq(model_fr, nfreq, xgrid)
@@ -112,7 +112,6 @@ if __name__ == '__main__':
     ax.plot(dB, model2_fnr_arr, label='DF_NB', marker='d', c=palette[4])
     ax.set_xlabel('SNR (dB)')
     ax.set_ylabel('FNR (\%)')
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1])
+    ax.legend()
     plt.savefig(os.path.join(args.output_dir, 'fnr.png'), bbox_inches='tight', pad_inches=0.0)
     plt.close()

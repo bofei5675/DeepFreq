@@ -17,7 +17,7 @@ from data import fr
 from data.loss import fnr
 
 #load models
-fr_path = '/scratch/bz1030/DS-GA-1013/DeepFreq/checkpoint/model_snr_30_bias_no/fr/epoch_300.pth'
+fr_path = '/scratch/bz1030/DS-GA-1013/DeepFreq/checkpoint/model_snr_50_bias_no/fr/epoch_300.pth'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 fr_module, _, _, _, _ = util.load(fr_path, 'fr', device)
 fr_module.to(device)
@@ -27,11 +27,11 @@ for idx, layer in enumerate(fr_module.modules()):
     if isinstance(layer, BFBatchNorm1d):
         #print(layer)
         x = torch.randn((2, 64, 100)).to(device)
-        alpha = 2
+        alpha = 10
         y1 = layer(alpha * x)
         y2 = alpha * layer(x)
 
-        print('scale',(y1 - y2).sum().item())
+        print('scale', (y1 - y2).sum().item())
 
         x = torch.zeros((2, 64,  100)).to(device)
         y = layer(x)

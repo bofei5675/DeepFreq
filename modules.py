@@ -34,6 +34,7 @@ class BFBatchNorm1d(nn.BatchNorm1d):
 
         y = self.weight.view(-1, 1) * y
         if self.affine:
+            #print('Add bias')
             y += self.bias.view(-1, 1)
 
         return y.view(return_shape).transpose(0, 1)

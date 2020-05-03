@@ -14,5 +14,8 @@ module purge
 source /scratch/bz1030/capstone_env/bin/activate
 
 cd ..
-python train.py --n_training 200000 --n_epochs_fr 200 --n_epochs_fc 100 --snrl 1 --snrh ${snr}\
- --output_dir ./checkpoint/model_snr_range_${snr}_bias_${bias} --bias ${bias}
+snrl=1
+snrh=50
+bias=yes
+python train.py --n_training 4000 --n_epochs_fr 200 --n_epochs_fc 100 --snrl ${snrl} --snrh ${snrh}\
+ --output_dir ./checkpoint/model_snr_range_${snrl}_${snrh}_bias_${bias} --bias ${bias}
