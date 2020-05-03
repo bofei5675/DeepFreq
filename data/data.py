@@ -2,15 +2,19 @@ import numpy as np
 import torch
 
 
-def frequency_generator(f, nf, min_sep, dist_distribution):
+def frequency_generator(f, nf, min_sep, dist_distribution, fixed_value=None):
     if dist_distribution == 'random':
         random_freq(f, nf, min_sep)
     elif dist_distribution == 'jittered':
         jittered_freq(f, nf, min_sep)
     elif dist_distribution == 'normal':
         normal_freq(f, nf, min_sep)
+    elif dist_distribution == 'fixed':
+        fixed_freq(f, nf, min_sep, fixed_value)
 
-
+def fixed_freq(f, nf, min_sep, fixed_freq):
+    f[0]=fixed_freq
+    
 def random_freq(f, nf, min_sep):
     """
     Generate frequencies uniformly.
@@ -67,26 +71,46 @@ def amplitude_generation(dim, amplitude, floor_amplitude=0.1):
 
 
 def gen_signal(num_samples, signal_dim, num_freq, min_sep, distance='normal', amplitude='normal_floor',
-               floor_amplitude=0.1, variable_num_freq=False):
-    s = np.zeros((num_samples, 2, signal_dim))
-    xgrid = np.arange(signal_dim)[:, None]
-    f = np.ones((num_samples, num_freq)) * np.inf
-    r = amplitude_generation((num_samples, num_freq), amplitude, floor_amplitude)
-    theta = np.random.rand(num_samples, signal_dim) * 2 * np.pi
-    d_sep = min_sep / signal_dim
-    if variable_num_freq:
-        nfreq = np.random.randint(1, num_freq + 1, num_samples)
+               floor_amplitude=0.1, variable_num_freq=False, fixed_freq=None):
+    
+    if fixed_freq is None:
+        s = np.zeros((num_samples, 2, signal_dim))
+        xgrid = np.arange(signal_dim)[:, None]
+        f = np.ones((num_samples, num_freq)) * np.inf
+        r = amplitude_generation((num_samples, num_freq), amplitude, floor_amplitude)
+        theta = np.random.rand(num_samples, signal_dim) * 2 * np.pi
+        d_sep = min_sep / signal_dim
+        if variable_num_freq:
+            nfreq = np.random.randint(1, num_freq + 1, num_samples)
+        else:
+            nfreq = np.ones(num_samples, dtype='int') * num_freq
+        for n in range(num_samples):
+            frequency_generator(f[n], nfreq[n], d_sep, distance)
+            for i in range(nfreq[n]):
+                sin = r[n, i] * np.exp(1j * theta[n, i] + 2j * np.pi * f[n, i] * xgrid.T)
+                s[n, 0] = s[n, 0] + sin.real
+                s[n, 1] = s[n, 1] + sin.imag
+            s[n] = s[n] / np.sqrt(np.mean(np.power(s[n], 2)))
+        f.sort(axis=1)
+        f[f == float('inf')] = -10
     else:
-        nfreq = np.ones(num_samples, dtype='int') * num_freq
-    for n in range(num_samples):
-        frequency_generator(f[n], nfreq[n], d_sep, distance)
-        for i in range(nfreq[n]):
-            sin = r[n, i] * np.exp(1j * theta[n, i] + 2j * np.pi * f[n, i] * xgrid.T)
-            s[n, 0] = s[n, 0] + sin.real
-            s[n, 1] = s[n, 1] + sin.imag
-        s[n] = s[n] / np.sqrt(np.mean(np.power(s[n], 2)))
-    f.sort(axis=1)
-    f[f == float('inf')] = -10
+        num_freq = 1
+        s = np.zeros((num_samples, 2, signal_dim))
+        xgrid = np.arange(signal_dim)[:, None]
+        f = np.ones((num_samples, num_freq)) * np.inf
+        r = amplitude_generation((num_samples, num_freq), amplitude, floor_amplitude)
+        theta = np.random.rand(num_samples, signal_dim) * 2 * np.pi
+        d_sep = min_sep / signal_dim
+        nfreq = np.ones(num_samples, dtype='int') * 1
+        for n in range(num_samples):
+            frequency_generator(f[n], nfreq[n], d_sep, 'fixed', fixed_freq)
+            for i in range(nfreq[n]):
+                sin = r[n, i] * np.exp(1j * theta[n, i] + 2j * np.pi * f[n, i] * xgrid.T)
+                s[n, 0] = s[n, 0] + sin.real
+                s[n, 1] = s[n, 1] + sin.imag
+            s[n] = s[n] / np.sqrt(np.mean(np.power(s[n], 2)))
+        f.sort(axis=1)
+        f[f == float('inf')] = -10
     return s.astype('float32'), f.astype('float32'), nfreq
 
 
