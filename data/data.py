@@ -13,7 +13,10 @@ def frequency_generator(f, nf, min_sep, dist_distribution, fixed_value=None):
         fixed_freq(f, nf, min_sep, fixed_value)
 
 def fixed_freq(f, nf, min_sep, fixed_freq):
-    f[0]=fixed_freq
+    assert len(fixed_freq) == f.shape[0]
+    for i in range(f.shape[0]):
+        f[i] = fixed_freq[i]
+    
     
 def random_freq(f, nf, min_sep):
     """
@@ -94,14 +97,13 @@ def gen_signal(num_samples, signal_dim, num_freq, min_sep, distance='normal', am
         f.sort(axis=1)
         f[f == float('inf')] = -10
     else:
-        num_freq = 1
         s = np.zeros((num_samples, 2, signal_dim))
         xgrid = np.arange(signal_dim)[:, None]
         f = np.ones((num_samples, num_freq)) * np.inf
         r = amplitude_generation((num_samples, num_freq), amplitude, floor_amplitude)
         theta = np.random.rand(num_samples, signal_dim) * 2 * np.pi
         d_sep = min_sep / signal_dim
-        nfreq = np.ones(num_samples, dtype='int') * 1
+        nfreq = np.ones(num_samples, dtype='int') * num_freq
         for n in range(num_samples):
             frequency_generator(f[n], nfreq[n], d_sep, 'fixed', fixed_freq)
             for i in range(nfreq[n]):
