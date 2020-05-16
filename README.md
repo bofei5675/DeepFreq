@@ -1,3 +1,11 @@
+# Code and Analysis for <br>"Interpreting Deep Neural Networks Trained forEstimating Sinusoid Frequencies"
+* DS-GA-1013 Mathematics Tool for Data Science, Final Project
+* Authors: Bofei Zhang, Yuanxi Sun
+The usage of this repo follows exactly same procedure as the original one.
+
+Below are documentation of original repo
+---
+
 # Code and Pretrained Networks from <br>"Data-driven Estimation of Sinusoid Frequencies"
 
 This repository contains information, code and models from the paper [Data-driven Estimation of Sinusoid Frequencies](https://arxiv.org/abs/1906.00823) by Gautier Izacard, [Sreyas Mohan](https://sreyas-mohan.github.io) and [Carlos Fernandez-Granda](https://cims.nyu.edu/~cfgranda/). Please visit the [project webpage here](https://sreyas-mohan.github.io/DeepFreq/). 
