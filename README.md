@@ -1,6 +1,11 @@
 # Code and Analysis for <br>"Interpreting Deep Neural Networks Trained forEstimating Sinusoid Frequencies"
+
 * DS-GA-1013 Mathematics Tool for Data Science, Final Project
+
 * Authors: Bofei Zhang, Yuanxi Sun
+
+* Report: click [here](https://github.com/bofei5675/DeepFreq/blob/master/report/DS_1013_Super_resolution.pdf)
+
 The usage of this repo follows exactly same procedure as the original one.
 
 Below are documentation of original repo
